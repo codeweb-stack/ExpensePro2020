@@ -1,6 +1,8 @@
-import 'package:ExpensePro2020/transaction.dart';
-import 'package:intl/intl.dart';
+import 'package:ExpensePro2020/utils/coolors.dart';
+import 'package:ExpensePro2020/widgets/add_transaction.dart';
 import 'package:flutter/material.dart';
+import './models/transaction.dart';
+import 'widgets/transaction_list.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,117 +14,89 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: MyExpense(),
       title: 'My Expense',
+      // theme: ThemeData(
+      //     primarySwatch: Colors.blueGrey, accentColor: Color(0xFFF5F5DC)),
     );
   }
 }
 
-class MyExpense extends StatelessWidget {
-  final List<Transaction> transactions = [
+class MyExpense extends StatefulWidget {
+  @override
+  _MyExpenseState createState() => _MyExpenseState();
+}
+
+class _MyExpenseState extends State<MyExpense> {
+  final List<Transaction> _userTransactions = [
     Transaction(
-        id: 1, title: 'buy jacket', amount: 3524.46, date: DateTime.now()),
-    Transaction(id: 2, title: 'buy book', amount: 1140.24, date: DateTime.now())
+        id: 1,
+        title: 'Flying Machine jacket',
+        amount: 3524.46,
+        date: DateTime.now()),
+    Transaction(
+        id: 2,
+        title: 'Quantum Computing book',
+        amount: 1140.24,
+        date: DateTime.now())
   ];
-  // String titlelisten;
-  // String amountlisten;
-  final titlecontroller = TextEditingController();
-  final amountcontroller = TextEditingController();
+
+  get len => _userTransactions.length;
+
+  void _addTransaction(String txTitle, double txAmount) {
+    Transaction addTx = Transaction(
+        id: len + 1, title: txTitle, amount: txAmount, date: DateTime.now());
+    setState(() {
+      _userTransactions.add(addTx);
+    });
+  }
+
+  void _startAddTransaction(BuildContext ctx) {
+    showModalBottomSheet(
+        context: ctx,
+        builder: (_) {
+          return AddTransaction(
+            addTx: _addTransaction,
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blueGrey,
+        backgroundColor: AppColors.orangeRedCrayola,
         title: Text('My Expense'),
-      ),
-      body: Column(
-        // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Container(
-          //   height: MediaQuery.of(context).size.height / 4,
-          // ),
-          Column(
-              children: transactions.map((e) {
-            return Card(
-              child: Row(
-                children: <Widget>[
-                  Container(
-                      margin:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                      decoration: BoxDecoration(
-                          border: Border.all(width: 2, color: Colors.blueGrey)),
-                      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                      child: Row(
-                        children: [
-                          Text(
-                            '\u{20B9} ${e.amount.toString()}',
-                            style: TextStyle(
-                                color: Colors.indigo,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      )),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        e.title.toUpperCase(),
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.blueGrey,
-                            fontWeight: FontWeight.w500),
-                      ),
-                      Text(DateFormat.yMMMMd().format(e.date),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.blueGrey[200],
-                          ))
-                    ],
-                  )
-                ],
-              ),
-            );
-          }).toList()),
-          Card(
-            elevation: 5,
-            child: Container(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  TextField(
-                    decoration: InputDecoration(
-                        labelText: 'Title', fillColor: Colors.indigo),
-                    cursorColor: Colors.indigo,
-                    controller: titlecontroller,
-                    // onChanged: (title) {
-                    //   titlelisten = title;
-                    // },
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                        labelText: 'Amount', prefixText: '\u{20B9} '),
-                    controller: amountcontroller,
-                    // onChanged: (amount) {
-                    //   amountlisten = amount;
-                    // },
-                  ),
-                  FlatButton(
-                      color: Colors.indigo,
-                      textColor: Colors.white,
-                      onPressed: () {
-                        // print(titlelisten);
-                        // print(amountlisten);
-                        print(titlecontroller.text);
-                        print(amountcontroller.text);
-                      },
-                      child: Text('Add Transaction'))
-                ],
-              ),
-            ),
-          )
+        actions: [
+          IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () {
+                _startAddTransaction(context);
+              }),
         ],
       ),
+      body: SingleChildScrollView(
+        child: Column(
+          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Container(
+            //   height: MediaQuery.of(context).size.height / 4,
+            // ),
+            TransactionList(
+              transactions: _userTransactions,
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.orangeRedCrayola,
+        child: Icon(
+          Icons.add,
+        ),
+        onPressed: () {
+          _startAddTransaction(context);
+        },
+      ),
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.miniCenterFloat,
     );
   }
 }
