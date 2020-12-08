@@ -3,6 +3,7 @@ import 'package:ExpensePro2020/widgets/add_transaction.dart';
 import 'package:flutter/material.dart';
 import './models/transaction.dart';
 import 'widgets/transaction_list.dart';
+import 'widgets/chart.dart';
 
 void main() {
   runApp(MyApp());
@@ -14,6 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: MyExpense(),
       title: 'My Expense',
+      theme: ThemeData(fontFamily: 'Pacifico'),
       // theme: ThemeData(
       //     primarySwatch: Colors.blueGrey, accentColor: Color(0xFFF5F5DC)),
     );
@@ -27,19 +29,25 @@ class MyExpense extends StatefulWidget {
 
 class _MyExpenseState extends State<MyExpense> {
   final List<Transaction> _userTransactions = [
-    Transaction(
-        id: 1,
-        title: 'Flying Machine jacket',
-        amount: 3524.46,
-        date: DateTime.now()),
-    Transaction(
-        id: 2,
-        title: 'Quantum Computing book',
-        amount: 1140.24,
-        date: DateTime.now())
+    // Transaction(
+    //     id: 1,
+    //     title: 'Flying Machine jacket',
+    //     amount: 3524.46,
+    //     date: DateTime.now()),
+    // Transaction(
+    //     id: 2,
+    //     title: 'Quantum Computing book',
+    //     amount: 1140.24,
+    //     date: DateTime.now())
   ];
 
   get len => _userTransactions.length;
+
+  List<Transaction> get _recentTransaction {
+    return _userTransactions.where((element) {
+      return element.date.isAfter(DateTime.now().subtract(Duration(days: 7)));
+    }).toList();
+  }
 
   void _addTransaction(String txTitle, double txAmount) {
     Transaction addTx = Transaction(
@@ -80,9 +88,30 @@ class _MyExpenseState extends State<MyExpense> {
             // Container(
             //   height: MediaQuery.of(context).size.height / 4,
             // ),
-            TransactionList(
-              transactions: _userTransactions,
-            ),
+            Chart(recentTransaction: _recentTransaction),
+            _userTransactions.isEmpty
+                ? Center(
+                    child: SizedBox(
+                      height: 100,
+                      width: 300,
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.note_add_rounded,
+                            color: AppColors.orangeRedCrayola,
+                            size: 30,
+                          ),
+                          Text(
+                            'No transactions added yet!',
+                            style: TextStyle(color: Colors.black38),
+                          )
+                        ],
+                      ),
+                    ),
+                  )
+                : TransactionList(
+                    transactions: _userTransactions,
+                  ),
           ],
         ),
       ),
