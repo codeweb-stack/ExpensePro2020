@@ -29,16 +29,16 @@ class MyExpense extends StatefulWidget {
 
 class _MyExpenseState extends State<MyExpense> {
   final List<Transaction> _userTransactions = [
-    // Transaction(
-    //     id: 1,
-    //     title: 'Flying Machine jacket',
-    //     amount: 3524.46,
-    //     date: DateTime.now()),
-    // Transaction(
-    //     id: 2,
-    //     title: 'Quantum Computing book',
-    //     amount: 1140.24,
-    //     date: DateTime.now())
+    Transaction(
+        id: 1,
+        title: 'Flying Machine jacket',
+        amount: 3524.46,
+        date: DateTime.now()),
+    Transaction(
+        id: 2,
+        title: 'Quantum Computing book',
+        amount: 1140.24,
+        date: DateTime.now())
   ];
 
   get len => _userTransactions.length;
@@ -49,9 +49,9 @@ class _MyExpenseState extends State<MyExpense> {
     }).toList();
   }
 
-  void _addTransaction(String txTitle, double txAmount) {
+  void _addTransaction(String txTitle, double txAmount, DateTime txdDate) {
     Transaction addTx = Transaction(
-        id: len + 1, title: txTitle, amount: txAmount, date: DateTime.now());
+        id: len + 1, title: txTitle, amount: txAmount, date: txdDate);
     setState(() {
       _userTransactions.add(addTx);
     });
@@ -65,6 +65,12 @@ class _MyExpenseState extends State<MyExpense> {
             addTx: _addTransaction,
           );
         });
+  }
+
+  void _deleteTransaction(int id) {
+    setState(() {
+      _userTransactions.removeAt(id);
+    });
   }
 
   @override
@@ -111,6 +117,7 @@ class _MyExpenseState extends State<MyExpense> {
                   )
                 : TransactionList(
                     transactions: _userTransactions,
+                    deletetnx: _deleteTransaction,
                   ),
           ],
         ),

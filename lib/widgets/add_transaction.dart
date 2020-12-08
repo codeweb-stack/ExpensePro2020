@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/coolors.dart';
+import 'package:intl/intl.dart';
 
 class AddTransaction extends StatefulWidget {
   // const AddTransaction({Key key}) : super(key: key);
@@ -15,14 +16,33 @@ class _AddTransactionState extends State<AddTransaction> {
 
   final amountcontroller = TextEditingController();
 
+  DateTime _selectedDate;
+
   void submitData() {
     final inputTitle = titlecontroller.text;
     final inputAmount = double.parse(amountcontroller.text);
-    if (inputTitle.isEmpty || inputAmount <= 0) {
+    if (inputTitle.isEmpty || inputAmount <= 0 || _selectedDate == null) {
       return;
     }
-    widget.addTx(inputTitle, inputAmount);
+    widget.addTx(inputTitle, inputAmount, _selectedDate);
     Navigator.of(context).pop();
+  }
+
+  void _choseData() {
+    showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2020),
+            lastDate: DateTime.now())
+        .then((value) {
+      if (value == null) {
+        return;
+      } else {
+        setState(() {
+          _selectedDate = value;
+        });
+      }
+    });
   }
 
   @override
@@ -64,7 +84,29 @@ class _AddTransactionState extends State<AddTransaction> {
                 //   amountlisten = amount;
                 // },
               ),
-              FlatButton(
+              Container(
+                height: 50,
+                child: Row(
+                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(_selectedDate == null
+                          ? 'Date not chosen yet!'
+                          : DateFormat.yMMMMd().format(_selectedDate)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: FlatButton(
+                        onPressed: _choseData,
+                        child: Text('Chose Date'),
+                        // color: AppColors.orangeRedCrayola,
+                        textColor: AppColors.robinEggBlue,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              RaisedButton(
                   color: AppColors.orangeRedCrayola,
                   textColor: Colors.white,
                   onPressed: submitData,

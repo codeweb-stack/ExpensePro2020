@@ -6,11 +6,12 @@ import '../utils/coolors.dart';
 
 class TransactionList extends StatelessWidget {
   final List<Transaction> transactions;
-  TransactionList({@required this.transactions});
+  final Function deletetnx;
+  TransactionList({@required this.transactions, this.deletetnx});
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 1200,
+      height: 550,
       child: ListView.builder(
         itemCount: transactions.length,
         itemBuilder: (ctx, index) {
@@ -42,8 +43,14 @@ class TransactionList extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   // fontWeight: FontWeight.w500,
-                  color: AppColors.corn,
+                  color: Colors.black,
                 ),
+              ),
+              trailing: IconButton(
+                icon: Icon(Icons.delete_forever_rounded),
+                onPressed: () {
+                  deletetnx(index);
+                },
               ),
             ),
           );
