@@ -1,11 +1,17 @@
+import 'package:flutter/material.dart';
 import 'package:ExpensePro2020/utils/coolors.dart';
 import 'package:ExpensePro2020/widgets/add_transaction.dart';
-import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 import './models/transaction.dart';
 import 'widgets/transaction_list.dart';
 import 'widgets/chart.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final appdir = await path_provider.getApplicationDocumentsDirectory();
+  Hive.init(appdir.path);
+  Hive.registerAdapter(TransactionAdapter());
   runApp(MyApp());
 }
 
@@ -13,7 +19,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyExpense(),
+      home: FutureBuilder(
+        future: Hive.openBox('transactions'),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return Text(snapshot.error.toString());
+            } else {
+              return MyExpense();
+            }
+          } else {
+            return Scaffold();
+          }
+        },
+      ),
       title: 'My Expense',
       theme: ThemeData(fontFamily: 'Pacifico'),
       // theme: ThemeData(
@@ -44,19 +63,27 @@ class _MyExpenseState extends State<MyExpense> {
   get len => _userTransactions.length;
 
   List<Transaction> get _recentTransaction {
-    return _userTransactions.where((element) {
-      return element.date.isAfter(DateTime.now().subtract(Duration(days: 7)));
-    }).toList();
+    final tnxBox = Hive.box('transactions');
+    return tnxBox.values
+        .where((element) {
+          return element.date
+              .isAfter(DateTime.now().subtract(Duration(days: 7)));
+        })
+        .toList()
+        .cast<Transaction>();
   }
 
   void _addTransaction(String txTitle, double txAmount, DateTime txdDate) {
     Transaction addTx = Transaction(
         id: len + 1, title: txTitle, amount: txAmount, date: txdDate);
+    final transactionsBox = Hive.box('transactions');
+    transactionsBox.add(addTx);
     setState(() {
       _userTransactions.add(addTx);
     });
   }
 
+  //use less code in case of hive db as watcher is looking for build refresher
   void _startAddTransaction(BuildContext ctx) {
     showModalBottomSheet(
         context: ctx,
