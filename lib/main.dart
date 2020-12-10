@@ -1,9 +1,13 @@
+import 'package:ExpensePro2020/services/expenseService.dart';
 import 'package:ExpensePro2020/utils/coolors.dart';
 import 'package:ExpensePro2020/widgets/add_transaction.dart';
 import 'package:flutter/material.dart';
 import './models/transaction.dart';
 import 'widgets/transaction_list.dart';
 import 'widgets/chart.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -28,20 +32,29 @@ class MyExpense extends StatefulWidget {
 }
 
 class _MyExpenseState extends State<MyExpense> {
-  final List<Transaction> _userTransactions = [
-    Transaction(
-        id: 1,
-        title: 'Flying Machine jacket',
-        amount: 3524.46,
-        date: DateTime.now()),
-    Transaction(
-        id: 2,
-        title: 'Quantum Computing book',
-        amount: 1140.24,
-        date: DateTime.now())
-  ];
-
+  List<Transaction> _userTransactions = [];
   get len => _userTransactions.length;
+
+  Future<String> getFilePath() async {
+    Directory appDir = await getApplicationDocumentsDirectory();
+    String appDirPath = appDir.path;
+    String filePath = '$appDirPath/myexpense.json';
+    return filePath;
+  }
+
+  void saveJson(List<Transaction> saveTnx) async {
+    File file = File(await getFilePath());
+    List<Map> tnxlist = saveTnx.map((e) => e.toJson()).toList();
+    file.writeAsString(jsonEncode(tnxlist));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    ExpenseService.getTnxs(context).then((value) {
+      _userTransactions = value;
+    });
+  }
 
   List<Transaction> get _recentTransaction {
     return _userTransactions.where((element) {
@@ -73,20 +86,25 @@ class _MyExpenseState extends State<MyExpense> {
     });
   }
 
+  void _save() {
+    saveJson(_userTransactions);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final appBar = AppBar(
+      backgroundColor: AppColors.orangeRedCrayola,
+      title: Text('My Expense'),
+      actions: [
+        IconButton(
+            icon: Icon(Icons.save),
+            onPressed: () {
+              _save();
+            }),
+      ],
+    );
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.orangeRedCrayola,
-        title: Text('My Expense'),
-        actions: [
-          IconButton(
-              icon: Icon(Icons.add),
-              onPressed: () {
-                _startAddTransaction(context);
-              }),
-        ],
-      ),
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -94,7 +112,12 @@ class _MyExpenseState extends State<MyExpense> {
             // Container(
             //   height: MediaQuery.of(context).size.height / 4,
             // ),
-            Chart(recentTransaction: _recentTransaction),
+            Container(
+                height: (MediaQuery.of(context).size.height -
+                        appBar.preferredSize.height -
+                        MediaQuery.of(context).padding.top) *
+                    0.28,
+                child: Chart(recentTransaction: _recentTransaction)),
             _userTransactions.isEmpty
                 ? Center(
                     child: SizedBox(
@@ -115,9 +138,15 @@ class _MyExpenseState extends State<MyExpense> {
                       ),
                     ),
                   )
-                : TransactionList(
-                    transactions: _userTransactions,
-                    deletetnx: _deleteTransaction,
+                : Container(
+                    height: (MediaQuery.of(context).size.height -
+                            appBar.preferredSize.height -
+                            MediaQuery.of(context).padding.top) *
+                        0.72,
+                    child: TransactionList(
+                      transactions: _userTransactions,
+                      deletetnx: _deleteTransaction,
+                    ),
                   ),
           ],
         ),
