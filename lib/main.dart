@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ExpensePro2020/utils/coolors.dart';
 import 'package:ExpensePro2020/widgets/add_transaction.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import './models/transaction.dart';
@@ -9,6 +10,8 @@ import 'widgets/chart.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   final appdir = await path_provider.getApplicationDocumentsDirectory();
   Hive.init(appdir.path);
   Hive.registerAdapter(TransactionAdapter());
@@ -47,18 +50,7 @@ class MyExpense extends StatefulWidget {
 }
 
 class _MyExpenseState extends State<MyExpense> {
-  final List<Transaction> _userTransactions = [
-    Transaction(
-        id: 1,
-        title: 'Flying Machine jacket',
-        amount: 3524.46,
-        date: DateTime.now()),
-    Transaction(
-        id: 2,
-        title: 'Quantum Computing book',
-        amount: 1140.24,
-        date: DateTime.now())
-  ];
+  final List<Transaction> _userTransactions = [];
 
   get len => _userTransactions.length;
 

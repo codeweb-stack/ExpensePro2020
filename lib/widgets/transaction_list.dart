@@ -58,8 +58,8 @@ class TransactionList extends StatelessWidget {
                     trailing: IconButton(
                       icon: Icon(Icons.delete_forever_rounded),
                       onPressed: () {
-                        deletetnx(index);
                         transactions.deleteAt(index);
+                        deletetnx(index + 1);
                       },
                     ),
                   ),
